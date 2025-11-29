@@ -52,9 +52,7 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
       }
 
       const data = await res.json();
-      localStorage.setItem("token", data.data);
-      // assume auth sets cookie/session
-      setLoading(false);
+
       router.push(redirectTo);
     } catch (err) {
       console.error(err);
@@ -64,7 +62,7 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center h-screen p-4">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
           <CardTitle className="text-center">Login</CardTitle>

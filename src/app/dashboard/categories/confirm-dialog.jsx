@@ -25,6 +25,7 @@ export function AreYouSure({ buttons, load, doDelete, id }) {
         <AlertDialogFooter>
           <AlertDialogCancel onClick={load}>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            className="bg-red-500 text-white hover:bg-black hover:text-red-500"
             onClick={() => {
               doDelete(id);
             }}

@@ -14,18 +14,42 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { ChevronDownIcon } from "lucide-react";
+import { formatDate } from "@/lib/format";
+
+import { Textarea } from "@/components/ui/textarea";
+
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { set } from "date-fns";
 
 export default function AddTransactionButton({ onSuccess }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [openCalendar, setOpenCalendar] = useState(false);
+
+  const [date, setDate] = useState(new Date());
+  const [amount, setAmount] = useState(0);
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(0);
+
+  function resetState() {
+    setDate(new Date());
+    setAmount(0);
+    setDescription("");
+    setCategory(0);
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,20 +57,23 @@ export default function AddTransactionButton({ onSuccess }) {
     if (loading) return;
     setLoading(true);
 
-    const formData = new FormData(e.target);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    const dateParam = `${year}-${month}-${day}`;
 
     const bodyJson = {
-      date: formData.get("date"),
-      amount: formData.get("amount"),
-      description: formData.get("description"),
-      category: formData.get("category"),
+      date: dateParam,
+      amount: amount,
+      description: description,
+      category: category,
     };
 
     if (bodyJson.date && bodyJson.amount && bodyJson.category) {
       const res = await fetch("/api/transactions", {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         method: "POST",
         body: JSON.stringify(bodyJson),
@@ -58,12 +85,15 @@ export default function AddTransactionButton({ onSuccess }) {
         return;
       }
 
+      resetState();
+
       if (onSuccess) onSuccess();
       setOpen(false);
       setLoading(false);
       toast.success("Transaction added");
     } else {
       toast.error("Date, amount, and category is required");
+      setLoading(false);
     }
   };
 
@@ -94,17 +124,48 @@ export default function AddTransactionButton({ onSuccess }) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Label>Date</Label>
-          <Input
-            type="date"
-            name="date"
-            defaultValue={new Date().toISOString().split("T")[0]}
-          />
+          <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                id="date"
+                className="w-48 justify-between font-normal"
+              >
+                {date ? formatDate(date) : "Select date"}
+                <ChevronDownIcon />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-auto overflow-hidden p-0"
+              align="start"
+            >
+              <Calendar
+                mode="single"
+                selected={date}
+                captionLayout="dropdown"
+                onSelect={(date) => {
+                  setDate(date);
+                  setOpenCalendar(false);
+                }}
+              />
+            </PopoverContent>
+          </Popover>
           <Label>Amount</Label>
-          <Input type="number" name="amount" />
+          <Input
+            type="number"
+            name="amount"
+            defaultValue={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
           <Label>Description</Label>
-          <Input name="description" />
+          <Textarea
+            name="description"
+            defaultValue={description}
+            placeholder="Enter description"
+            onChange={(e) => setDescription(e.target.value)}
+          />
           <Label>Category</Label>
-          <Select name="category">
+          <Select name="category" onValueChange={(e) => setCategory(e)}>
             <SelectTrigger>
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>

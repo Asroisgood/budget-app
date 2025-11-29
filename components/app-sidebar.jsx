@@ -48,7 +48,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <Link
                       href={item.url}
-                      className={item.isLogout && "text-red-500"}
+                      className={item.isLogout && "text-red-500 bg-red-50 "}
                     >
                       <item.icon />
                       <span>{item.title}</span>

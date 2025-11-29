@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AddCategoryButton from "./AddCategoryButton";
+import AddCategoryButton from "./add-category";
 
 import {
   Table,
@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { AreYouSure } from "./AlertDialog";
+import { AreYouSure } from "./confirm-dialog";
 import { toast } from "sonner";
 
 export default function CategoriesPages() {

@@ -72,6 +72,7 @@ export async function POST(req) {
   const userId = decoded.id;
 
   const body = await req.json();
+  console.log(body);
 
   const [year, month, day] = body.date.split("-");
 
