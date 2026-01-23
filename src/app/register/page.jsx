@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft, Home, Wallet, TrendingUp, DollarSign } from "lucide-react";
 
 export default function RegisterPage({ redirectTo = "/dashboard" }) {
   const router = useRouter();
@@ -69,17 +70,64 @@ export default function RegisterPage({ redirectTo = "/dashboard" }) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-slate-950">
-      {/* Background Effects */}
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Enhanced Animated Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-500/20 blur-[120px]" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-amber-400/20 blur-[140px]" />
-        <div className="absolute left-0 top-1/3 h-40 w-40 rounded-full bg-sky-400/20 blur-[90px]" />
+        {/* Animated gradient mesh */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-emerald-500/10 via-transparent to-blue-500/10 animate-pulse" />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-purple-500/10 via-transparent to-pink-500/10 animate-pulse delay-1000" />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-bl from-amber-500/10 via-transparent to-teal-500/10 animate-pulse delay-2000" />
+        </div>
+
+        {/* Floating particles */}
+        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400/30 rounded-full animate-bounce" />
+        <div className="absolute top-32 right-20 w-3 h-3 bg-blue-400/30 rounded-full animate-bounce delay-500" />
+        <div className="absolute bottom-40 left-32 w-2 h-2 bg-purple-400/30 rounded-full animate-bounce delay-1000" />
+        <div className="absolute bottom-20 right-40 w-1 h-1 bg-pink-400/30 rounded-full animate-bounce delay-1500" />
+        <div className="absolute top-1/2 left-20 w-2 h-2 bg-amber-400/30 rounded-full animate-bounce delay-700" />
+        <div className="absolute top-1/3 right-32 w-1 h-1 bg-teal-400/30 rounded-full animate-bounce delay-1200" />
+
+        {/* Large animated orbs */}
+        <div className="absolute -top-40 left-1/4 w-96 h-96 -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/10 blur-[200px] animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500/15 to-indigo-500/10 blur-[180px] animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-0 w-64 h-64 -translate-y-1/2 rounded-full bg-gradient-to-r from-purple-500/15 to-pink-500/10 blur-[160px] animate-pulse delay-500" />
+
+        {/* Moving light beams */}
+        <div className="absolute top-0 left-1/2 w-1 h-full bg-gradient-to-b from-emerald-400/10 to-transparent animate-pulse delay-500" />
+        <div className="absolute top-0 right-1/3 w-1 h-full bg-gradient-to-b from-blue-400/10 to-transparent animate-pulse delay-1500" />
+        <div className="absolute bottom-0 left-1/4 w-1 h-full bg-gradient-to-t from-purple-400/10 to-transparent animate-pulse delay-1000" />
       </div>
 
-      <Card className="w-full max-w-md mx-auto bg-slate-900/95 border border-white/10 backdrop-blur shadow-2xl shadow-emerald-500/10">
-        <CardHeader>
-          <CardTitle className="text-center text-white">Buat Akun</CardTitle>
+      {/* Back to Home Button - Outside card */}
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-[100]">
+        <Link
+          href="/"
+          className="flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur border border-white/10 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/90 transition-all duration-300 group shadow-lg"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform duration-300" />
+          <Home className="h-4 w-4" />
+          <span className="text-sm font-medium">Beranda</span>
+        </Link>
+      </div>
+
+      <Card className="w-full max-w-md mx-auto bg-slate-900/90 border border-white/10 backdrop-blur-xl shadow-2xl shadow-emerald-500/20 relative overflow-hidden">
+        {/* Card decoration */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-500/15 to-transparent rounded-full blur-2xl" />
+
+        <CardHeader className="relative">
+          <CardTitle className="text-center text-white text-2xl font-bold">
+            <div className="flex items-center justify-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 rounded-xl border border-emerald-500/20">
+                <Wallet className="h-6 w-6 text-emerald-400" />
+              </div>
+              <span>Daftar</span>
+            </div>
+          </CardTitle>
+          <p className="text-center text-slate-400 text-sm mt-3">
+            Buat akun budget baru kamu
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
@@ -200,13 +248,17 @@ export default function RegisterPage({ redirectTo = "/dashboard" }) {
               >
                 {loading ? "Loading..." : "Daftar"}
               </Button>
+            </div>
+
+            <p className="text-sm text-slate-400">
+              Sudah punya akun?{" "}
               <Link
                 href="/login"
-                className="text-sm text-slate-400 hover:text-slate-200"
+                className="text-emerald-400 hover:text-emerald-300"
               >
-                Sudah punya akun?
+                Login di sini
               </Link>
-            </div>
+            </p>
           </form>
         </CardContent>
       </Card>
