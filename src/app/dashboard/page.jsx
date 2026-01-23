@@ -11,6 +11,13 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/format";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Skeleton Component
 const SkeletonCard = ({ className = "" }) => (
@@ -123,16 +130,48 @@ export default function DashboardPage() {
     recentTransactions: [],
     monthlyData: [],
     categoryBreakdown: [],
+    period: "this-month",
+    dateRange: { start: "", end: "" },
   });
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState("this-month");
+
+  // Helper function to get period label
+  const getPeriodLabel = (periodValue) => {
+    const labels = {
+      "this-month": "Bulan Ini",
+      "last-month": "Bulan Lalu",
+      "this-quarter": "Quarter Ini",
+      "this-year": "Tahun Ini",
+      "all-time": "Semua Waktu",
+    };
+    return labels[periodValue] || "Bulan Ini";
+  };
+
+  // Format date range for display
+  const formatDateRange = (start, end) => {
+    if (!start || !end) return "";
+    const startDate = new Date(start).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const endDate = new Date(end).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    return `${startDate} - ${endDate}`;
+  };
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [period]); // Re-fetch when period changes
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch("/api/dashboard");
+      setLoading(true);
+      const response = await fetch(`/api/dashboard?period=${period}`);
       if (response.ok) {
         const data = await response.json();
         setSummary(data);
@@ -160,9 +199,76 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-        <p className="text-slate-400">Overview budget kamu</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+          <p className="text-slate-400">Overview budget kamu</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger className="w-40 bg-slate-800 border-white/20 text-slate-200">
+              <SelectValue placeholder="Pilih periode" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-900 border-white/20">
+              <SelectItem
+                value="this-month"
+                className="text-slate-200 hover:bg-slate-700"
+              >
+                Bulan Ini
+              </SelectItem>
+              <SelectItem
+                value="last-month"
+                className="text-slate-200 hover:bg-slate-700"
+              >
+                Bulan Lalu
+              </SelectItem>
+              <SelectItem
+                value="this-quarter"
+                className="text-slate-200 hover:bg-slate-700"
+              >
+                Quarter Ini
+              </SelectItem>
+              <SelectItem
+                value="this-year"
+                className="text-slate-200 hover:bg-slate-700"
+              >
+                Tahun Ini
+              </SelectItem>
+              <SelectItem
+                value="all-time"
+                className="text-slate-200 hover:bg-slate-700"
+              >
+                Semua Waktu
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Time Context Info Bar */}
+      <div className="bg-slate-800/50 border border-white/10 rounded-lg p-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-emerald-400" />
+            <span className="text-slate-200">
+              Menampilkan data:{" "}
+              <span className="font-semibold">{getPeriodLabel(period)}</span>
+            </span>
+            {summary.dateRange?.start && summary.dateRange?.end && (
+              <span className="text-sm text-slate-400 hidden sm:inline">
+                (
+                {formatDateRange(
+                  summary.dateRange.start,
+                  summary.dateRange.end,
+                )}
+                )
+              </span>
+            )}
+          </div>
+          <div className="text-sm text-slate-400">
+            {summary.transactionCount} transaksi
+          </div>
+        </div>
       </div>
 
       {/* Summary Cards */}

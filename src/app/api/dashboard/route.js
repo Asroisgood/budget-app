@@ -27,11 +27,24 @@ export async function GET(req) {
     }
 
     const userId = decoded.id;
+    const { searchParams } = new URL(req.url);
+    const period = searchParams.get("period") || "this-month"; // Default to this month
 
-    // Get all transactions for the user
+    // Calculate date range based on period
+    const dateRange = getDateRange(period);
+
+    console.log(
+      `Dashboard API - Period: ${period}, Range: ${dateRange.start} to ${dateRange.end}`,
+    );
+
+    // Get transactions within the specified period
     const transactions = await prisma.transaction.findMany({
       where: {
         userId: userId,
+        date: {
+          gte: dateRange.start,
+          lte: dateRange.end,
+        },
       },
       include: {
         category: true,
@@ -76,6 +89,11 @@ export async function GET(req) {
       balance,
       transactionCount: transactions.length,
       recentTransactions: formattedTransactions,
+      period: period, // Include period in response
+      dateRange: {
+        start: dateRange.start.toISOString(),
+        end: dateRange.end.toISOString(),
+      },
       monthlyData: [], // TODO: Add monthly breakdown
       categoryBreakdown: [], // TODO: Add category breakdown
     };
@@ -88,4 +106,46 @@ export async function GET(req) {
       { status: 500 },
     );
   }
+}
+
+// Helper function to calculate date range based on period
+function getDateRange(period) {
+  const now = new Date();
+  let start, end;
+
+  switch (period) {
+    case "this-month":
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      break;
+
+    case "last-month":
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      break;
+
+    case "this-quarter":
+      const quarter = Math.floor(now.getMonth() / 3);
+      start = new Date(now.getFullYear(), quarter * 3, 1);
+      end = new Date(now.getFullYear(), quarter * 3 + 3, 0, 23, 59, 59, 999);
+      break;
+
+    case "this-year":
+      start = new Date(now.getFullYear(), 0, 1);
+      end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+      break;
+
+    case "all-time":
+      start = new Date(2000, 0, 1); // Far past date
+      end = new Date(now.getFullYear() + 1, 0, 1); // Far future date
+      break;
+
+    default:
+      // Default to this-month
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      break;
+  }
+
+  return { start, end };
 }
