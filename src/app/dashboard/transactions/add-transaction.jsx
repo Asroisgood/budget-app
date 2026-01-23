@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DatePicker } from "@/components/ui/date-picker";
+import CustomDatePicker from "@/components/ui/date-picker-custom";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -104,14 +104,19 @@ export default function AddTransactionButton({ onSuccess }) {
           <span className="sm:hidden">Add</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900 border-white/10 text-white max-w-sm mx-4 max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Transaction</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <Label htmlFor="date">Date</Label>
-            <DatePicker
+            <Label
+              htmlFor="date"
+              className="text-sm font-medium text-slate-200 mb-2"
+            >
+              Date
+            </Label>
+            <CustomDatePicker
               value={formData.date ? new Date(formData.date) : null}
               onChange={(date) =>
                 setFormData({
@@ -119,13 +124,17 @@ export default function AddTransactionButton({ onSuccess }) {
                   date: date ? date.toISOString().split("T")[0] : "",
                 })
               }
-              placeholder="Select date"
-              className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200"
+              placeholder="Pilih tanggal"
             />
           </div>
 
           <div>
-            <Label htmlFor="amount">Amount</Label>
+            <Label
+              htmlFor="amount"
+              className="text-sm font-medium text-slate-200 mb-2"
+            >
+              Amount
+            </Label>
             <Input
               id="amount"
               type="number"
@@ -141,7 +150,12 @@ export default function AddTransactionButton({ onSuccess }) {
           </div>
 
           <div>
-            <Label htmlFor="category">Category</Label>
+            <Label
+              htmlFor="category"
+              className="text-sm font-medium text-slate-200 mb-2"
+            >
+              Category
+            </Label>
             <Select
               value={formData.category}
               onValueChange={(value) =>
@@ -152,7 +166,7 @@ export default function AddTransactionButton({ onSuccess }) {
               <SelectTrigger className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-white/20 max-h-60 overflow-y-auto">
+              <SelectContent className="bg-slate-900/95 border border-white/20 max-h-60 overflow-y-auto">
                 {categories.map((category) => (
                   <SelectItem
                     key={category.id}
@@ -187,7 +201,12 @@ export default function AddTransactionButton({ onSuccess }) {
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label
+              htmlFor="description"
+              className="text-sm font-medium text-slate-200 mb-2"
+            >
+              Description
+            </Label>
             <Input
               id="description"
               value={formData.description}
@@ -195,17 +214,17 @@ export default function AddTransactionButton({ onSuccess }) {
                 setFormData({ ...formData, description: e.target.value })
               }
               placeholder="Enter description"
-              className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200"
+              className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 w-full"
               required
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="border-white/20 hover:bg-white/10 transition-all duration-200"
+              className="border-white/20 hover:bg-white/10 text-slate-200 transition-all duration-200"
             >
               Cancel
             </Button>

@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { AreYouSure } from "./confirm-dialog";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/format";
-import { DatePicker } from "@/components/ui/date-picker";
+import CustomDatePicker from "@/components/ui/date-picker-custom";
 import { format } from "date-fns";
 import PaginationComponent from "./pagination";
 
@@ -322,7 +322,7 @@ const TransactionsPage = memo(function TransactionsPage() {
               <Label className="text-slate-200 text-xs sm:text-sm font-medium mb-2 block">
                 Date From
               </Label>
-              <DatePicker
+              <CustomDatePicker
                 value={filters.dateFrom ? new Date(filters.dateFrom) : null}
                 onChange={(d) =>
                   setFilters({
@@ -330,8 +330,8 @@ const TransactionsPage = memo(function TransactionsPage() {
                     dateFrom: d ? d.toISOString().split("T")[0] : "",
                   })
                 }
-                placeholder="Select start date"
-                className="h-9 sm:h-10 bg-slate-800/50 border-white/20 text-slate-200 placeholder:text-slate-500 focus:border-emerald-500 focus:bg-slate-800/70 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm"
+                placeholder="Dari tanggal"
+                className="h-9 sm:h-10"
               />
             </div>
 
@@ -339,7 +339,7 @@ const TransactionsPage = memo(function TransactionsPage() {
               <Label className="text-slate-200 text-xs sm:text-sm font-medium mb-2 block">
                 Date To
               </Label>
-              <DatePicker
+              <CustomDatePicker
                 value={filters.dateTo ? new Date(filters.dateTo) : null}
                 onChange={(d) =>
                   setFilters({
@@ -347,8 +347,8 @@ const TransactionsPage = memo(function TransactionsPage() {
                     dateTo: d ? d.toISOString().split("T")[0] : "",
                   })
                 }
-                placeholder="Select end date"
-                className="h-9 sm:h-10 bg-slate-800/50 border-white/20 text-slate-200 placeholder:text-slate-500 focus:border-emerald-500 focus:bg-slate-800/70 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm"
+                placeholder="Sampai tanggal"
+                className="h-9 sm:h-10"
               />
             </div>
           </div>
