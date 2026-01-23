@@ -56,11 +56,31 @@ const TransactionsPage = memo(function TransactionsPage() {
   });
 
   const [categories, setCategories] = useState([]);
+  const [dateError, setDateError] = useState("");
 
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const page = Number(params.get("page")) || 1;
+
+  /* ================= VALIDASI DATE RANGE ================= */
+  const validateDateRange = useCallback((dateFrom, dateTo) => {
+    if (dateFrom && dateTo) {
+      const fromDate = new Date(dateFrom);
+      const toDate = new Date(dateTo);
+
+      if (fromDate > toDate) {
+        setDateError("Date From tidak boleh lebih besar dari Date To");
+        return false;
+      } else {
+        setDateError("");
+        return true;
+      }
+    } else {
+      setDateError("");
+      return true;
+    }
+  }, []);
 
   /* ================= FETCH CATEGORIES ================= */
   const getCategories = useCallback(async () => {
@@ -324,12 +344,14 @@ const TransactionsPage = memo(function TransactionsPage() {
               </Label>
               <CustomDatePicker
                 value={filters.dateFrom ? new Date(filters.dateFrom) : null}
-                onChange={(d) =>
+                onChange={(d) => {
+                  const newDateFrom = d ? d.toISOString().split("T")[0] : "";
                   setFilters({
                     ...filters,
-                    dateFrom: d ? d.toISOString().split("T")[0] : "",
-                  })
-                }
+                    dateFrom: newDateFrom,
+                  });
+                  validateDateRange(newDateFrom, filters.dateTo);
+                }}
                 placeholder="Dari tanggal"
               />
             </div>
@@ -340,20 +362,44 @@ const TransactionsPage = memo(function TransactionsPage() {
               </Label>
               <CustomDatePicker
                 value={filters.dateTo ? new Date(filters.dateTo) : null}
-                onChange={(d) =>
+                onChange={(d) => {
+                  const newDateTo = d ? d.toISOString().split("T")[0] : "";
                   setFilters({
                     ...filters,
-                    dateTo: d ? d.toISOString().split("T")[0] : "",
-                  })
-                }
+                    dateTo: newDateTo,
+                  });
+                  validateDateRange(filters.dateFrom, newDateTo);
+                }}
                 placeholder="Sampai tanggal"
               />
             </div>
           </div>
 
+          {/* Error Message */}
+          {dateError && (
+            <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+              <p className="text-red-400 text-sm flex items-center gap-2">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  />
+                </svg>
+                {dateError}
+              </p>
+            </div>
+          )}
+
           <div className="flex items-center justify-end pt-4 sm:pt-6">
             <Button
-              onClick={() =>
+              onClick={() => {
                 setFilters({
                   category: "all",
                   type: "all",
@@ -362,8 +408,9 @@ const TransactionsPage = memo(function TransactionsPage() {
                   dateTo: "",
                   sortBy: "date",
                   sortOrder: "desc",
-                })
-              }
+                });
+                setDateError("");
+              }}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-6 py-2 h-9 sm:h-10 transition-all duration-200 hover:scale-105 shadow-lg shadow-emerald-500/25 text-sm min-h-[36px] sm:min-h-[40px] w-full sm:w-auto"
             >
               <svg
