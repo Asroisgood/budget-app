@@ -19,6 +19,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Suppress hydration warning for Radix UI components
+const DialogNoSSR = Dialog;
+const DialogTriggerNoSSR = DialogTrigger;
+const DialogContentNoSSR = DialogContent;
+const DialogHeaderNoSSR = DialogHeader;
+const DialogTitleNoSSR = DialogTitle;
+const SelectNoSSR = Select;
+const SelectContentNoSSR = SelectContent;
+const SelectItemNoSSR = SelectItem;
+const SelectTriggerNoSSR = SelectTrigger;
+const SelectValueNoSSR = SelectValue;
+
 const categoryTypes = [
   { value: "expense", label: "Expense" },
   { value: "income", label: "Income" },
@@ -121,17 +133,17 @@ export default function AddCategoryButton({ onSuccess }) {
         </Button>
       </div>
 
-      <Dialog
+      <DialogNoSSR
         open={open}
         onOpenChange={(open) => {
           setOpen(open);
           setLoading(false);
         }}
       >
-        <DialogTrigger asChild className="hidden sm:block">
-          <Button className="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:scale-105">
+        <DialogTriggerNoSSR asChild className="hidden sm:block">
+          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:scale-105 min-w-fit">
             <svg
-              className="mr-2 h-4 w-4"
+              className="mr-2 h-4 w-4 flex-shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -143,16 +155,16 @@ export default function AddCategoryButton({ onSuccess }) {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            Add Category
+            <span className="whitespace-nowrap">Add Category</span>
           </Button>
-        </DialogTrigger>
+        </DialogTriggerNoSSR>
 
-        <DialogContent className="bg-slate-900/95 border border-white/10 shadow-2xl shadow-emerald-500/10 backdrop-blur">
-          <DialogHeader>
-            <DialogTitle className="text-xl text-slate-200">
+        <DialogContentNoSSR className="bg-slate-900/95 border border-white/10 shadow-2xl shadow-emerald-500/10 backdrop-blur">
+          <DialogHeaderNoSSR>
+            <DialogTitleNoSSR className="text-xl text-slate-200">
               Add New Category
-            </DialogTitle>
-          </DialogHeader>
+            </DialogTitleNoSSR>
+          </DialogHeaderNoSSR>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 gap-4">
@@ -171,13 +183,13 @@ export default function AddCategoryButton({ onSuccess }) {
                 <Label className="text-slate-200 text-sm font-medium">
                   Category Type
                 </Label>
-                <Select name="categoryType">
-                  <SelectTrigger className="mt-1 bg-slate-800/50 border-white/20 text-slate-200 hover:bg-slate-800/70">
-                    <SelectValue placeholder="Select category type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-900/95 border border-white/20 backdrop-blur">
+                <SelectNoSSR name="categoryType">
+                  <SelectTriggerNoSSR className="mt-1 bg-slate-800/50 border-white/20 text-slate-200 hover:bg-slate-800/70">
+                    <SelectValueNoSSR placeholder="Select category type" />
+                  </SelectTriggerNoSSR>
+                  <SelectContentNoSSR className="bg-slate-900/95 border border-white/20 backdrop-blur">
                     {validCategoryTypes.map((type) => (
-                      <SelectItem
+                      <SelectItemNoSSR
                         key={type.value}
                         value={type.value}
                         className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
@@ -192,10 +204,10 @@ export default function AddCategoryButton({ onSuccess }) {
                           />
                           <span>{type.label}</span>
                         </div>
-                      </SelectItem>
+                      </SelectItemNoSSR>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </SelectContentNoSSR>
+                </SelectNoSSR>
               </div>
             </div>
 
@@ -257,8 +269,8 @@ export default function AddCategoryButton({ onSuccess }) {
               </Button>
             </div>
           </form>
-        </DialogContent>
-      </Dialog>
+        </DialogContentNoSSR>
+      </DialogNoSSR>
     </>
   );
 }

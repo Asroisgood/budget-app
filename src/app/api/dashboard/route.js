@@ -49,17 +49,37 @@ export async function GET(req) {
 
     const balance = totalIncome - totalExpense;
 
+    // Get recent transactions (last 5)
+    const recentTransactions = await prisma.transaction.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        category: true,
+      },
+      orderBy: {
+        date: "desc",
+      },
+      take: 5,
+    });
+
+    // Format dates for display
+    const formattedTransactions = recentTransactions.map((t) => ({
+      ...t,
+      date: new Date(t.date).toLocaleDateString("id-ID"),
+    }));
+
     const stats = {
       totalIncome,
       totalExpense,
       balance,
       transactionCount: transactions.length,
+      recentTransactions: formattedTransactions,
+      monthlyData: [], // TODO: Add monthly breakdown
+      categoryBreakdown: [], // TODO: Add category breakdown
     };
 
-    return NextResponse.json(
-      { message: "Stats fetched", data: stats },
-      { status: 200 },
-    );
+    return NextResponse.json(stats, { status: 200 });
   } catch (error) {
     console.error("GET /api/dashboard/stats error:", error);
     return NextResponse.json(

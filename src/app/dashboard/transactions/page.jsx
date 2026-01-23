@@ -17,15 +17,19 @@ import { formatCurrency } from "@/lib/format";
 import { DatePicker } from "@/components/ui/date-picker";
 import { format } from "date-fns";
 import PaginationComponent from "./pagination";
+
+// Suppress hydration warning for Radix UI components
+const DialogNoSSR = require("@/components/ui/dialog").Dialog;
+const DialogTriggerNoSSR = require("@/components/ui/dialog").DialogTrigger;
+const DialogContentNoSSR = require("@/components/ui/dialog").DialogContent;
+const SelectNoSSR = require("@/components/ui/select").Select;
+const SelectContentNoSSR = require("@/components/ui/select").SelectContent;
+const SelectItemNoSSR = require("@/components/ui/select").SelectItem;
+const SelectTriggerNoSSR = require("@/components/ui/select").SelectTrigger;
+const SelectValueNoSSR = require("@/components/ui/select").SelectValue;
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 /* ================= HELPERS ================= */
@@ -205,15 +209,15 @@ const TransactionsPage = memo(function TransactionsPage() {
             <Label className="text-slate-200 text-xs sm:text-sm font-medium mb-2 block">
               Type
             </Label>
-            <Select
+            <SelectNoSSR
               value={filters.type}
               onValueChange={(v) => setFilters({ ...filters, type: v })}
             >
-              <SelectTrigger className="h-9 sm:h-10 bg-slate-800/50 border-white/20 text-slate-200 hover:bg-slate-800/70 focus:border-emerald-500 focus:bg-slate-800/70 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm">
-                <SelectValue placeholder="All types" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-900/95 border border-white/20 backdrop-blur">
-                <SelectItem
+              <SelectTriggerNoSSR className="h-9 sm:h-10 bg-slate-800/50 border-white/20 text-slate-200 hover:bg-slate-800/70 focus:border-emerald-500 focus:bg-slate-800/70 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm">
+                <SelectValueNoSSR placeholder="All types" />
+              </SelectTriggerNoSSR>
+              <SelectContentNoSSR className="bg-slate-900/95 border border-white/20 backdrop-blur">
+                <SelectItemNoSSR
                   value="all"
                   className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
                 >
@@ -221,8 +225,8 @@ const TransactionsPage = memo(function TransactionsPage() {
                     <div className="w-2 h-2 rounded-full bg-slate-400"></div>
                     <span className="text-sm">All Types</span>
                   </div>
-                </SelectItem>
-                <SelectItem
+                </SelectItemNoSSR>
+                <SelectItemNoSSR
                   value="income"
                   className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
                 >
@@ -230,8 +234,8 @@ const TransactionsPage = memo(function TransactionsPage() {
                     <div className="w-2 h-2 rounded-full bg-green-400"></div>
                     <span className="text-sm">Income</span>
                   </div>
-                </SelectItem>
-                <SelectItem
+                </SelectItemNoSSR>
+                <SelectItemNoSSR
                   value="expense"
                   className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
                 >
@@ -239,24 +243,24 @@ const TransactionsPage = memo(function TransactionsPage() {
                     <div className="w-2 h-2 rounded-full bg-red-400"></div>
                     <span className="text-sm">Expense</span>
                   </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                </SelectItemNoSSR>
+              </SelectContentNoSSR>
+            </SelectNoSSR>
           </div>
 
           <div>
             <Label className="text-slate-200 text-xs sm:text-sm font-medium mb-2 block">
               Category
             </Label>
-            <Select
+            <SelectNoSSR
               value={filters.category}
               onValueChange={(v) => setFilters({ ...filters, category: v })}
             >
-              <SelectTrigger className="h-9 sm:h-10 bg-slate-800/50 border-white/20 text-slate-200 hover:bg-slate-800/70 focus:border-emerald-500 focus:bg-slate-800/70 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm">
-                <SelectValue placeholder="All categories" />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-900/95 border border-white/20 backdrop-blur max-w-xs">
-                <SelectItem
+              <SelectTriggerNoSSR className="h-9 sm:h-10 bg-slate-800/50 border-white/20 text-slate-200 hover:bg-slate-800/70 focus:border-emerald-500 focus:bg-slate-800/70 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm">
+                <SelectValueNoSSR placeholder="All categories" />
+              </SelectTriggerNoSSR>
+              <SelectContentNoSSR className="bg-slate-900/95 border border-white/20 backdrop-blur max-w-xs">
+                <SelectItemNoSSR
                   value="all"
                   className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
                 >
@@ -264,9 +268,9 @@ const TransactionsPage = memo(function TransactionsPage() {
                     <div className="w-2 h-2 rounded-full bg-slate-400"></div>
                     <span className="text-sm">All Categories</span>
                   </div>
-                </SelectItem>
+                </SelectItemNoSSR>
                 {categories.map((c) => (
-                  <SelectItem
+                  <SelectItemNoSSR
                     key={c.id}
                     value={c.id.toString()}
                     className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
@@ -288,10 +292,10 @@ const TransactionsPage = memo(function TransactionsPage() {
                         {c.type}
                       </span>
                     </div>
-                  </SelectItem>
+                  </SelectItemNoSSR>
                 ))}
-              </SelectContent>
-            </Select>
+              </SelectContentNoSSR>
+            </SelectNoSSR>
           </div>
         </div>
 

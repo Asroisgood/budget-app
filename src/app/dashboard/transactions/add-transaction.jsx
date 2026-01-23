@@ -52,12 +52,18 @@ export default function AddTransactionButton({ onSuccess }) {
     setLoading(true);
 
     try {
+      // Simple amount conversion - no formatting complications
+      const submissionData = {
+        ...formData,
+        amount: parseFloat(formData.amount) || 0,
+      };
+
       const res = await fetch("/api/transactions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionData),
       });
 
       const data = await res.json();
@@ -148,7 +154,11 @@ export default function AddTransactionButton({ onSuccess }) {
               </SelectTrigger>
               <SelectContent className="bg-slate-900 border-white/20 max-h-60 overflow-y-auto">
                 {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id.toString()}>
+                  <SelectItem
+                    key={category.id}
+                    value={category.id.toString()}
+                    className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
+                  >
                     <div className="flex items-center gap-2">
                       <div
                         className={`w-2 h-2 rounded-full ${
@@ -157,7 +167,15 @@ export default function AddTransactionButton({ onSuccess }) {
                             : "bg-red-400"
                         }`}
                       />
-                      {category.name}
+                      <span
+                        className={`${
+                          category.type === "income"
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {category.name}
+                      </span>
                       <span className="text-xs text-slate-400">
                         ({category.type})
                       </span>
