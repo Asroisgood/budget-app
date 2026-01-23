@@ -142,8 +142,31 @@ function CustomDatePicker({
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="text-sm font-medium text-slate-200">
-                {format(currentMonth, "MMMM yyyy", { locale: id })}
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium text-slate-200">
+                  {format(currentMonth, "MMMM yyyy", { locale: id })}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const today = new Date();
+                    const fixedToday = new Date(
+                      today.getFullYear(),
+                      today.getMonth(),
+                      today.getDate(),
+                      12,
+                      0,
+                      0,
+                    );
+                    handleDateSelect(fixedToday);
+                  }}
+                  className="h-6 px-2 text-xs bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-md transition-colors"
+                >
+                  Today
+                </Button>
               </div>
               <Button
                 variant="ghost"
@@ -193,19 +216,22 @@ function CustomDatePicker({
                       handleDateSelect(day);
                     }}
                     className={cn(
-                      "h-8 w-8 p-0 text-sm transition-all duration-200",
+                      "h-8 w-8 p-0 text-sm transition-all duration-200 relative",
                       !isCurrentMonth && "text-slate-600 opacity-50",
                       isTodayDate &&
                         !isSelected &&
-                        "bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30",
+                        "bg-slate-800 text-slate-200 font-semibold border-2 border-emerald-500 hover:bg-slate-700",
                       isSelected &&
-                        "bg-emerald-600 text-white hover:bg-emerald-700",
+                        "bg-emerald-600 text-white hover:bg-emerald-700 font-bold border-2 border-emerald-400 shadow-lg shadow-emerald-500/30",
                       !isSelected &&
                         !isTodayDate &&
                         "hover:bg-slate-700 text-slate-200",
                     )}
                   >
                     {format(day, "d")}
+                    {isTodayDate && !isSelected && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    )}
                   </Button>
                 );
               })}
