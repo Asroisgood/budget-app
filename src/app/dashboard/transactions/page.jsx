@@ -331,7 +331,6 @@ const TransactionsPage = memo(function TransactionsPage() {
                   })
                 }
                 placeholder="Dari tanggal"
-                className="h-9 sm:h-10"
               />
             </div>
 
@@ -348,7 +347,6 @@ const TransactionsPage = memo(function TransactionsPage() {
                   })
                 }
                 placeholder="Sampai tanggal"
-                className="h-9 sm:h-10"
               />
             </div>
           </div>
