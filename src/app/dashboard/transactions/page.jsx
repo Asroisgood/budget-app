@@ -17,6 +17,7 @@ import { formatCurrency } from "@/lib/format";
 import CustomDatePicker from "@/components/ui/date-picker-custom";
 import { format } from "date-fns";
 import PaginationComponent from "./pagination";
+import { debounce } from "lodash";
 
 // Suppress hydration warning for Radix UI components
 const DialogNoSSR = require("@/components/ui/dialog").Dialog;
@@ -62,6 +63,14 @@ const TransactionsPage = memo(function TransactionsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const page = Number(params.get("page")) || 1;
+
+  /* ================= DEBOUNCED SEARCH ================= */
+  const debouncedSearch = useCallback(
+    debounce((searchValue) => {
+      setFilters((prev) => ({ ...prev, search: searchValue }));
+    }, 300),
+    [], // Remove setFilters dependency to avoid infinite loop
+  );
 
   /* ================= VALIDASI DATE RANGE ================= */
   const validateDateRange = useCallback((dateFrom, dateTo) => {
@@ -110,40 +119,62 @@ const TransactionsPage = memo(function TransactionsPage() {
       if (filters.category && filters.category !== "all")
         query.set("category", filters.category);
       if (filters.type !== "all") query.set("type", filters.type);
-      if (filters.search) query.set("search", filters.search);
+      if (filters.search) {
+        query.set("search", filters.search);
+        console.log("Searching for:", filters.search);
+      }
       if (filters.dateFrom) query.set("dateFrom", filters.dateFrom);
       if (filters.dateTo) query.set("dateTo", filters.dateTo);
       query.set("sortBy", filters.sortBy);
       query.set("sortOrder", filters.sortOrder);
 
+      console.log("API Query:", query.toString());
       const res = await fetch(`/api/transactions?${query.toString()}`);
-      if (!res.ok) throw new Error();
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("API Error Response:", {
+          status: res.status,
+          statusText: res.statusText,
+          data: errorData,
+        });
+        throw new Error(
+          errorData.message || `HTTP ${res.status}: ${res.statusText}`,
+        );
+      }
 
       const data = await res.json();
+      console.log("API Response:", data);
       setTransactions(data.data || []);
       setPagination(data.pagination || {});
     } catch (err) {
-      console.error(err);
+      console.error("Frontend fetch error:", err);
+      console.error("Error details:", {
+        message: err.message,
+        stack: err.stack,
+        status: err.status,
+        statusText: err.statusText,
+      });
       setTransactions([]);
       setPagination({});
       setError("Failed to fetch transactions");
     } finally {
       setLoading(false);
     }
-  }, [page, filters]);
+  }, [
+    page,
+    filters.category,
+    filters.type,
+    filters.search,
+    filters.dateFrom,
+    filters.dateTo,
+    filters.sortBy,
+    filters.sortOrder,
+  ]);
 
   useEffect(() => {
     getTransaction();
   }, [getTransaction]);
-
-  /* ================= RESET PAGE WHEN FILTER CHANGE ================= */
-  useEffect(() => {
-    if (page > 1) {
-      const newParams = new URLSearchParams(params.toString());
-      newParams.set("page", "1");
-      router.push(`${pathname}?${newParams.toString()}`);
-    }
-  }, [filters]);
 
   /* ================= DELETE ================= */
   const doDelete = useCallback(
@@ -217,10 +248,11 @@ const TransactionsPage = memo(function TransactionsPage() {
             </Label>
             <Input
               placeholder="Search transactions..."
-              value={filters.search}
-              onChange={(e) =>
-                setFilters({ ...filters, search: e.target.value })
-              }
+              defaultValue={filters.search}
+              onChange={(e) => {
+                const value = e.target.value;
+                debouncedSearch(value);
+              }}
               className="h-9 sm:h-10 bg-slate-800/50 border-white/20 text-slate-200 placeholder:text-slate-500 focus:border-emerald-500 focus:bg-slate-800/70 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-sm"
             />
           </div>

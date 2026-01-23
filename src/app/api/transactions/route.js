@@ -52,23 +52,23 @@ export async function GET(req) {
 
     if (searchParams.get("search")) {
       const searchTerm = searchParams.get("search").trim();
+      console.log("Backend received search term:", searchTerm);
       if (searchTerm) {
         where.OR = [
           {
             description: {
               contains: searchTerm,
-              mode: "insensitive",
             },
           },
           {
             category: {
               name: {
                 contains: searchTerm,
-                mode: "insensitive",
               },
             },
           },
         ];
+        console.log("Search where clause:", where.OR);
       }
     }
 
@@ -82,51 +82,63 @@ export async function GET(req) {
       }
     }
 
-    const transactions = await prisma.transaction.findMany({
-      where,
-      include: {
-        category: true,
-      },
-      orderBy: {
-        [sortBy]: sortOrder,
-      },
-      skip: offset,
-      take: limit,
-    });
+    console.log("Final where clause:", where);
 
-    // Convert Decimal amounts to Numbers for proper JSON serialization
-    const formattedTransactions = transactions.map((t) => ({
-      ...t,
-      amount: Number(t.amount),
-    }));
+    try {
+      const transactions = await prisma.transaction.findMany({
+        where,
+        include: {
+          category: true,
+        },
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+        skip: offset,
+        take: limit,
+      });
 
-    const total = await prisma.transaction.count({
-      where,
-    });
+      console.log("Found transactions:", transactions.length);
 
-    const totalPage = Math.ceil(total / limit);
+      // Convert Decimal amounts to Numbers for proper JSON serialization
+      const formattedTransactions = transactions.map((t) => ({
+        ...t,
+        amount: Number(t.amount),
+      }));
 
-    // Only return pagination if there are transactions
-    const pagination =
-      transactions.length > 0
-        ? {
-            total,
-            totalPage,
-            currentPage: page,
-            limit,
-            prev: page > 1 ? page - 1 : null,
-            next: page < totalPage ? page + 1 : null,
-          }
-        : null;
+      const total = await prisma.transaction.count({
+        where,
+      });
 
-    return NextResponse.json(
-      {
-        message: "Transactions fetched",
-        data: formattedTransactions,
-        pagination,
-      },
-      { status: 200 },
-    );
+      const totalPage = Math.ceil(total / limit);
+
+      // Only return pagination if there are transactions
+      const pagination =
+        transactions.length > 0
+          ? {
+              total,
+              totalPage,
+              currentPage: page,
+              limit,
+              prev: page > 1 ? page - 1 : null,
+              next: page < totalPage ? page + 1 : null,
+            }
+          : null;
+
+      return NextResponse.json(
+        {
+          message: "Transactions fetched",
+          data: formattedTransactions,
+          pagination,
+        },
+        { status: 200 },
+      );
+    } catch (dbError) {
+      console.error("Database query error:", dbError);
+      return NextResponse.json(
+        { message: "Database query failed", data: [], pagination: null },
+        { status: 500 },
+      );
+    }
   } catch (error) {
     console.error("GET /api/transactions error:", error);
     return NextResponse.json(
