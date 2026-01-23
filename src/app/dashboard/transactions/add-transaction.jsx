@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -137,12 +138,14 @@ export default function AddTransactionButton({ onSuccess }) {
             </Label>
             <Input
               id="amount"
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
               value={formData.amount}
-              onChange={(e) =>
-                setFormData({ ...formData, amount: e.target.value })
-              }
+              onChange={(e) => {
+                // Only allow numbers and decimal point
+                const value = e.target.value.replace(/[^0-9.]/g, "");
+                setFormData({ ...formData, amount: value });
+              }}
               placeholder="Enter amount"
               className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200"
               required
@@ -207,14 +210,14 @@ export default function AddTransactionButton({ onSuccess }) {
             >
               Description
             </Label>
-            <Input
+            <Textarea
               id="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
               placeholder="Enter description"
-              className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 w-full"
+              className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 w-full h-20 resize-none"
               required
             />
           </div>
