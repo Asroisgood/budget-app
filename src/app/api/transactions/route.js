@@ -94,6 +94,12 @@ export async function GET(req) {
       take: limit,
     });
 
+    // Convert Decimal amounts to Numbers for proper JSON serialization
+    const formattedTransactions = transactions.map((t) => ({
+      ...t,
+      amount: Number(t.amount),
+    }));
+
     const total = await prisma.transaction.count({
       where,
     });
@@ -114,7 +120,11 @@ export async function GET(req) {
         : null;
 
     return NextResponse.json(
-      { message: "Transactions fetched", data: transactions, pagination },
+      {
+        message: "Transactions fetched",
+        data: formattedTransactions,
+        pagination,
+      },
       { status: 200 },
     );
   } catch (error) {

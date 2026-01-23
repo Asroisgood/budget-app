@@ -14,18 +14,20 @@ import { formatCurrency } from "@/lib/format";
 
 // Skeleton Component
 const SkeletonCard = ({ className = "" }) => (
-  <div
-    className={`bg-slate-900/50 border border-white/10 backdrop-blur rounded-xl p-6 ${className}`}
+  <Card
+    className={`bg-slate-900/50 border-white/10 backdrop-blur ${className}`}
   >
-    <div className="animate-pulse">
-      <div className="flex items-center justify-between mb-4">
-        <div className="h-4 bg-slate-700 rounded w-20"></div>
-        <div className="h-4 w-4 bg-slate-700 rounded"></div>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <div className="h-4 bg-slate-700 rounded w-20 animate-pulse"></div>
+      <div className="h-4 w-4 bg-slate-700 rounded animate-pulse"></div>
+    </CardHeader>
+    <CardContent>
+      <div className="animate-pulse">
+        <div className="h-8 bg-slate-700 rounded w-32 mb-2"></div>
+        <div className="h-3 bg-slate-700 rounded w-24"></div>
       </div>
-      <div className="h-8 bg-slate-700 rounded w-32 mb-2"></div>
-      <div className="h-3 bg-slate-700 rounded w-24"></div>
-    </div>
-  </div>
+    </CardContent>
+  </Card>
 );
 
 const SkeletonQuickActions = () => (
@@ -148,10 +150,13 @@ export default function DashboardPage() {
 
   // Calculate percentages
   const total = summary.totalIncome + summary.totalExpense;
-  const incomePercentage =
-    total > 0 ? ((summary.totalIncome / total) * 100).toFixed(1) : 0;
-  const expensePercentage =
-    total > 0 ? ((summary.totalExpense / total) * 100).toFixed(1) : 0;
+  let incomePercentage = 0;
+  let expensePercentage = 0;
+
+  if (total > 0) {
+    incomePercentage = ((summary.totalIncome / total) * 100).toFixed(1);
+    expensePercentage = ((summary.totalExpense / total) * 100).toFixed(1);
+  }
 
   return (
     <div className="space-y-6">
@@ -174,7 +179,7 @@ export default function DashboardPage() {
               {formatCurrency(summary.totalIncome || 0)}
             </div>
             <div className="text-xs text-slate-400 mt-1">
-              {incomePercentage}% dari total
+              {total > 0 ? `${incomePercentage}% dari total` : "Tidak ada data"}
             </div>
           </CardContent>
         </Card>
@@ -191,7 +196,9 @@ export default function DashboardPage() {
               {formatCurrency(summary.totalExpense || 0)}
             </div>
             <div className="text-xs text-slate-400 mt-1">
-              {expensePercentage}% dari total
+              {total > 0
+                ? `${expensePercentage}% dari total`
+                : "Tidak ada data"}
             </div>
           </CardContent>
         </Card>

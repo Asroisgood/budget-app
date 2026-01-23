@@ -38,14 +38,14 @@ export async function GET(req) {
       },
     });
 
-    // Calculate stats
+    // Calculate stats - convert Decimal to Number properly
     const totalIncome = transactions
       .filter((t) => t.category.type === "income")
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const totalExpense = transactions
       .filter((t) => t.category.type === "expense")
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + Number(t.amount), 0);
 
     const balance = totalIncome - totalExpense;
 
@@ -63,9 +63,10 @@ export async function GET(req) {
       take: 5,
     });
 
-    // Format dates for display
+    // Format dates for display and convert amounts to Number
     const formattedTransactions = recentTransactions.map((t) => ({
       ...t,
+      amount: Number(t.amount), // Convert Decimal to Number
       date: new Date(t.date).toLocaleDateString("id-ID"),
     }));
 
