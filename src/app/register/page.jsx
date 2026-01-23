@@ -8,22 +8,25 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function LoginForm({ redirectTo = "/dashboard" }) {
+export default function RegisterPage({ redirectTo = "/dashboard" }) {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const validate = () => {
+    if (name && name.trim().length < 2) return "Nama minimal 2 karakter";
     if (!email) return "Email harus diisi";
-    // simple email regex
     const re =
-      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\\.,;:\s@\"]+\.)+[^<>()[\]\\.,;:\s@\"]{2,})$/i;
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|\".+\")@(([^<>()[\]\\.,;:\s@\"]+\.)+[^<>()[\]\\.,;:\s@\"]{2,})$/i;
     if (!re.test(email)) return "Format email tidak valid";
     if (!password) return "Password harus diisi";
     if (password.length < 6) return "Password minimal 6 karakter";
+    if (password !== confirmPassword) return "Konfirmasi password tidak cocok";
     return null;
   };
 
@@ -39,21 +42,24 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
 
     try {
       setLoading(true);
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          name: name.trim() || undefined,
+          email,
+          password,
+        }),
       });
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        setError(body?.message || "Gagal login");
+        setError(body?.message || "Gagal registrasi");
         setLoading(false);
         return;
       }
 
-      const data = await res.json();
-
+      await res.json();
       router.push(redirectTo);
     } catch (err) {
       console.error(err);
@@ -63,7 +69,7 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen p-4 bg-slate-950">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-slate-950">
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-500/20 blur-[120px]" />
@@ -73,10 +79,24 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
 
       <Card className="w-full max-w-md mx-auto bg-slate-900/95 border border-white/10 backdrop-blur shadow-2xl shadow-emerald-500/10">
         <CardHeader>
-          <CardTitle className="text-center text-white">Login</CardTitle>
+          <CardTitle className="text-center text-white">Buat Akun</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="name" className="text-slate-200">
+                Nama (opsional)
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Nama kamu"
+                className="mt-1 bg-slate-800/50 border-white/20 text-slate-200 placeholder:text-slate-500 focus:border-emerald-500 focus:bg-slate-800/70"
+              />
+            </div>
+
             <div>
               <Label htmlFor="email" className="text-slate-200">
                 Email
@@ -106,7 +126,6 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
                   required
                   className="bg-slate-800/50 border-white/20 text-slate-200 placeholder:text-slate-500 focus:border-emerald-500 focus:bg-slate-800/70"
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
@@ -116,7 +135,6 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
                   }
                 >
                   {showPassword ? (
-                    // fallback icon if you don't have Icons
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -157,6 +175,21 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
               </div>
             </div>
 
+            <div>
+              <Label htmlFor="confirmPassword" className="text-slate-200">
+                Konfirmasi Password
+              </Label>
+              <Input
+                id="confirmPassword"
+                type={showPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Ulangi password"
+                required
+                className="mt-1 bg-slate-800/50 border-white/20 text-slate-200 placeholder:text-slate-500 focus:border-emerald-500 focus:bg-slate-800/70"
+              />
+            </div>
+
             {error && <p className="text-sm text-red-400">{error}</p>}
 
             <div className="flex items-center justify-between">
@@ -165,26 +198,15 @@ export default function LoginForm({ redirectTo = "/dashboard" }) {
                 disabled={loading}
                 className="bg-emerald-600 hover:bg-emerald-700"
               >
-                {loading ? "Loading..." : "Masuk"}
+                {loading ? "Loading..." : "Daftar"}
               </Button>
-
-              <a
-                href="/forgot-password"
+              <Link
+                href="/login"
                 className="text-sm text-slate-400 hover:text-slate-200"
               >
-                Lupa password?
-              </a>
-            </div>
-
-            <p className="text-sm text-slate-400">
-              Belum punya akun?{" "}
-              <Link
-                href="/register"
-                className="text-emerald-400 hover:text-emerald-300"
-              >
-                Daftar di sini
+                Sudah punya akun?
               </Link>
-            </p>
+            </div>
           </form>
         </CardContent>
       </Card>

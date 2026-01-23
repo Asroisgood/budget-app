@@ -410,7 +410,7 @@ const TransactionsPage = memo(function TransactionsPage() {
           </p>
         </div>
       ) : (
-        <div className="animate-fadeIn">
+        <div className="">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-6 shadow-xl shadow-emerald-500/10 backdrop-blur overflow-x-auto">
             {/* Mobile Card View */}
             <div className="sm:hidden">
@@ -426,10 +426,15 @@ const TransactionsPage = memo(function TransactionsPage() {
                           <p className="text-white font-medium text-sm mb-1 line-clamp-2">
                             {t.description}
                           </p>
-                          <p className="text-slate-400 text-xs">ID: #{t.id}</p>
+                          <p className="text-slate-400 text-xs">
+                            #{t.id} • {formatDateForDisplay(t.date)}
+                          </p>
                         </div>
                         <div className="ml-3">
                           <AreYouSure
+                            id={t.id}
+                            doDelete={doDelete}
+                            load={getTransaction}
                             buttons={
                               <Button
                                 variant="destructive"
@@ -438,9 +443,6 @@ const TransactionsPage = memo(function TransactionsPage() {
                                 Delete
                               </Button>
                             }
-                            load={getTransaction}
-                            doDelete={doDelete}
-                            id={t.id}
                           />
                         </div>
                       </div>
@@ -483,9 +485,7 @@ const TransactionsPage = memo(function TransactionsPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-slate-400 animate-fadeIn">
-                    No transactions found
-                  </p>
+                  <p className="text-slate-400">No transactions found</p>
                 </div>
               )}
             </div>
@@ -495,112 +495,107 @@ const TransactionsPage = memo(function TransactionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-slate-200 text-center whitespace-nowrap text-xs sm:text-sm w-20">
+                    <TableHead className="text-slate-200 text-xs sm:text-sm">
                       Action
                     </TableHead>
-                    <TableHead className="text-slate-200 text-center whitespace-nowrap text-xs sm:text-sm w-16">
+                    <TableHead className="text-slate-200 w-[80px] text-xs sm:text-sm">
                       ID
                     </TableHead>
-                    <TableHead className="text-slate-200 text-left whitespace-nowrap text-xs sm:text-sm">
-                      Description
-                    </TableHead>
-                    <TableHead className="text-slate-200 text-center whitespace-nowrap text-xs sm:text-sm w-24">
+                    <TableHead className="text-slate-200 text-xs sm:text-sm">
                       Amount
                     </TableHead>
-                    <TableHead className="text-slate-200 text-center whitespace-nowrap text-xs sm:text-sm">
+                    <TableHead className="text-slate-200 text-xs sm:text-sm">
+                      Description
+                    </TableHead>
+                    <TableHead className="text-slate-200 text-xs sm:text-sm">
                       Date
                     </TableHead>
-                    <TableHead className="text-slate-200 text-left whitespace-nowrap text-xs sm:text-sm">
+                    <TableHead className="text-slate-200 text-xs sm:text-sm">
                       Category
                     </TableHead>
-                    <TableHead className="text-slate-200 text-center whitespace-nowrap text-xs sm:text-sm w-24">
+                    <TableHead className="text-slate-200 text-xs sm:text-sm">
                       Type
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.map((t) => (
-                    <TableRow
-                      key={t.id}
-                      className="border-white/10 animate-slideIn hover:bg-white/5 transition-colors duration-200"
-                    >
-                      <TableCell className="text-slate-200 text-center p-2 sm:p-4 w-20">
-                        <AreYouSure
-                          buttons={
-                            <Button
-                              variant="destructive"
-                              className="bg-red-600 hover:bg-red-700 text-white font-medium px-2 sm:px-3 py-1.5 sm:py-1.5 rounded-lg transition-all duration-200 hover:scale-105 shadow-lg shadow-red-500/25 min-h-[32px] sm:min-h-[36px] text-xs sm:text-sm"
-                            >
-                              Delete
-                            </Button>
-                          }
-                          load={getTransaction}
-                          doDelete={doDelete}
-                          id={t.id}
-                        />
-                      </TableCell>
-                      <TableCell className="text-slate-200 text-center whitespace-nowrap text-xs sm:text-sm w-16">
-                        {t.id}
-                      </TableCell>
-                      <TableCell className="text-slate-200 text-left text-xs sm:text-sm">
-                        <span
-                          className="block truncate max-w-[150px] lg:max-w-none"
-                          title={t.description}
-                        >
-                          {t.description}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-slate-200 text-center w-24">
-                        <span
-                          className={`font-bold text-sm ${
+                  {transactions.length > 0 ? (
+                    transactions.map((t) => (
+                      <TableRow
+                        key={t.id}
+                        className="border-white/10 hover:bg-white/5 transition-colors duration-200"
+                      >
+                        <TableCell className="text-slate-200 p-2 sm:p-4">
+                          <AreYouSure
+                            id={t.id}
+                            doDelete={doDelete}
+                            load={getTransaction}
+                            buttons={
+                              <Button
+                                variant="destructive"
+                                className="bg-red-600 hover:bg-red-700 text-white font-medium px-2 sm:px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105 shadow-lg shadow-red-500/25 text-xs min-h-[32px]"
+                              >
+                                Delete
+                              </Button>
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="text-slate-200 font-medium text-xs sm:text-sm whitespace-nowrap">
+                          {t.id}
+                        </TableCell>
+                        <TableCell
+                          className={`font-medium text-xs sm:text-sm ${
                             t.category.type === "expense"
                               ? "text-red-400"
                               : "text-green-400"
                           }`}
                         >
                           {formatCurrency(t.amount)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-slate-200 text-center text-xs sm:text-sm whitespace-nowrap">
-                        {formatDateForDisplay(t.date)}
-                      </TableCell>
-                      <TableCell className="text-slate-200 text-left text-xs sm:text-sm">
-                        <span
-                          className="block truncate max-w-[150px] lg:max-w-none"
-                          title={t.category.name}
-                        >
-                          {t.category.name}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-slate-200 text-center w-24">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                            t.category.type === "income"
-                              ? "bg-green-500/20 text-green-400"
-                              : "bg-red-500/20 text-red-400"
-                          }`}
-                        >
+                        </TableCell>
+                        <TableCell className="text-slate-200 text-xs sm:text-sm max-w-[120px] lg:max-w-none">
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              t.category.type === "income"
-                                ? "bg-green-400"
-                                : "bg-red-400"
-                            }`}
-                          ></span>
-                          {t.category.type}
-                        </span>
+                            className="block truncate"
+                            title={t.description}
+                          >
+                            {t.description}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-slate-200 text-xs sm:text-sm whitespace-nowrap">
+                          {formatDateForDisplay(t.date)}
+                        </TableCell>
+                        <TableCell className="text-slate-200 text-xs sm:text-sm max-w-[100px] lg:max-w-none">
+                          <span
+                            className="block truncate"
+                            title={t.category.name}
+                          >
+                            {t.category.name}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-slate-200 text-xs sm:text-sm">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                t.category.type === "income"
+                                  ? "bg-green-400"
+                                  : "bg-red-400"
+                              }`}
+                            />
+                            <span>{t.category.type}</span>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center">
+                        <p className="text-slate-400 py-8">
+                          No transactions found
+                        </p>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
-              {transactions.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-slate-400 animate-fadeIn">
-                    No transactions found
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </div>

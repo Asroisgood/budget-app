@@ -1,13 +1,7 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,169 +11,194 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { ChevronDownIcon } from "lucide-react";
-import { formatDate } from "@/lib/format";
-
-import { Textarea } from "@/components/ui/textarea";
-
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
-import { set } from "date-fns";
 
 export default function AddTransactionButton({ onSuccess }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    description: "",
+    amount: "",
+    category: "",
+    date: new Date().toISOString().split("T")[0],
+  });
   const [categories, setCategories] = useState([]);
-  const [openCalendar, setOpenCalendar] = useState(false);
 
-  const [date, setDate] = useState(new Date());
-  const [amount, setAmount] = useState(0);
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(0);
-
-  function resetState() {
-    setDate(new Date());
-    setAmount(0);
-    setDescription("");
-    setCategory(0);
-  }
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/categories");
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (loading) return;
     setLoading(true);
 
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const year = date.getFullYear();
-
-    const dateParam = `${year}-${month}-${day}`;
-
-    const bodyJson = {
-      date: dateParam,
-      amount: amount,
-      description: description,
-      category: category,
-    };
-
-    if (bodyJson.date && bodyJson.amount && bodyJson.category) {
+    try {
       const res = await fetch("/api/transactions", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        method: "POST",
-        body: JSON.stringify(bodyJson),
+        body: JSON.stringify(formData),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        console.log(await res.json());
-        alert("Failed to add transaction");
-        return;
+        throw new Error(data.message || "Failed to create transaction");
       }
 
-      resetState();
-
-      if (onSuccess) onSuccess();
+      toast.success("Transaction created successfully");
+      setFormData({
+        description: "",
+        amount: "",
+        category: "",
+        date: new Date().toISOString().split("T")[0],
+      });
       setOpen(false);
-      setLoading(false);
-      toast.success("Transaction added");
-    } else {
-      toast.error("Date, amount, and category is required");
+      onSuccess();
+    } catch (error) {
+      toast.error(error.message || "Failed to create transaction");
+    } finally {
       setLoading(false);
     }
   };
 
-  async function getCategories() {
-    const res = await fetch("/api/categories", { method: "GET" });
-    const data = await res.json();
-    setCategories(data);
-  }
-
-  useEffect(() => {
-    getCategories();
-  }, [open]);
+  const handleOpenChange = (isOpen) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      fetchCategories();
+    }
+  };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        setOpen(open);
-        setLoading(false);
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>Add Transaction</Button>
+        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-200 hover:scale-105">
+          <Plus className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Add Transaction</span>
+          <span className="sm:hidden">Add</span>
+        </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-slate-900 border-white/10 text-white max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogTitle>Add New Transaction</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Label>Date</Label>
-          <Popover open={openCalendar} onOpenChange={setOpenCalendar}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                id="date"
-                className="w-48 justify-between font-normal"
-              >
-                {date ? formatDate(date) : "Select date"}
-                <ChevronDownIcon />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto overflow-hidden p-0"
-              align="start"
+          <div>
+            <Label htmlFor="date">Date</Label>
+            <DatePicker
+              value={formData.date ? new Date(formData.date) : null}
+              onChange={(date) =>
+                setFormData({
+                  ...formData,
+                  date: date ? date.toISOString().split("T")[0] : "",
+                })
+              }
+              placeholder="Select date"
+              className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="amount">Amount</Label>
+            <Input
+              id="amount"
+              type="number"
+              step="0.01"
+              value={formData.amount}
+              onChange={(e) =>
+                setFormData({ ...formData, amount: e.target.value })
+              }
+              placeholder="Enter amount"
+              className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="category">Category</Label>
+            <Select
+              value={formData.category}
+              onValueChange={(value) =>
+                setFormData({ ...formData, category: value })
+              }
+              required
             >
-              <Calendar
-                mode="single"
-                selected={date}
-                captionLayout="dropdown"
-                onSelect={(date) => {
-                  setDate(date);
-                  setOpenCalendar(false);
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-          <Label>Amount</Label>
-          <Input
-            type="number"
-            name="amount"
-            defaultValue={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-          <Label>Description</Label>
-          <Textarea
-            name="description"
-            defaultValue={description}
-            placeholder="Enter description"
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <Label>Category</Label>
-          <Select name="category" onValueChange={(e) => setCategory(e)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id.toString()}>
-                  {category.name} ( {category.type} )
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Submit"}
-          </Button>
+              <SelectTrigger className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-white/20 max-h-60 overflow-y-auto">
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id.toString()}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          category.type === "income"
+                            ? "bg-green-400"
+                            : "bg-red-400"
+                        }`}
+                      />
+                      {category.name}
+                      <span className="text-xs text-slate-400">
+                        ({category.type})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Input
+              id="description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              placeholder="Enter description"
+              className="bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200"
+              required
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="border-white/20 hover:bg-white/10 transition-all duration-200"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-emerald-600 hover:bg-emerald-700 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Creating..." : "Create Transaction"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

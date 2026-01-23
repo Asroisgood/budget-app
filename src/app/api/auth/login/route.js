@@ -12,11 +12,11 @@ export async function POST(req) {
     if (!email || !password) {
       return NextResponse.json(
         { message: "Email and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const user = await prisma.User.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
@@ -25,7 +25,7 @@ export async function POST(req) {
     if (user.password !== password) {
       return NextResponse.json(
         { message: "Invalid password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -35,7 +35,7 @@ export async function POST(req) {
 
     const response = NextResponse.json(
       { message: "Login successful", data: jwtToken },
-      { status: 200 }
+      { status: 200 },
     );
 
     response.cookies.set({
@@ -52,7 +52,7 @@ export async function POST(req) {
     console.error(error);
     return NextResponse.json(
       { message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
