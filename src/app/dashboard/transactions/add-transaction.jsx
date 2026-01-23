@@ -29,6 +29,7 @@ export default function AddTransactionButton({ onSuccess }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [amountDisplay, setAmountDisplay] = useState(""); // For formatted display
   const [formData, setFormData] = useState({
     description: "",
     amount: "",
@@ -46,6 +47,50 @@ export default function AddTransactionButton({ onSuccess }) {
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
+    }
+  };
+
+  // Format number with thousand separators (Indonesian format)
+  const formatAmount = (value) => {
+    // Remove all non-digit characters
+    const cleanValue = value.replace(/[^0-9]/g, "");
+
+    if (cleanValue === "") return "";
+
+    // Convert to number first
+    const number = parseInt(cleanValue, 10);
+
+    if (isNaN(number)) return "";
+
+    // Format with Indonesian thousand separators
+    return number.toLocaleString("id-ID");
+  };
+
+  // Parse formatted amount back to number
+  const parseAmount = (formattedValue) => {
+    // Remove all non-digit characters
+    const cleanValue = formattedValue.replace(/[^0-9]/g, "");
+    return cleanValue === "" ? 0 : parseInt(cleanValue, 10);
+  };
+
+  // Handle amount input change
+  const handleAmountChange = (e) => {
+    const value = e.target.value;
+
+    // Allow only numbers (formatting will handle separators)
+    const sanitizedValue = value.replace(/[^0-9]/g, "");
+
+    // Format for display
+    const formatted = formatAmount(sanitizedValue);
+    setAmountDisplay(formatted);
+
+    // Parse and store actual value (as number, not string)
+    const actualValue = parseAmount(formatted);
+    setFormData({ ...formData, amount: actualValue.toString() });
+
+    // Clear error when user types
+    if (errors.amount) {
+      setErrors({ ...errors, amount: "" });
     }
   };
 
@@ -108,6 +153,7 @@ export default function AddTransactionButton({ onSuccess }) {
         category: "",
         date: new Date().toISOString().split("T")[0],
       });
+      setAmountDisplay(""); // Clear formatted display
       setErrors({}); // Clear errors on success
       setOpen(false);
       onSuccess();
@@ -169,17 +215,9 @@ export default function AddTransactionButton({ onSuccess }) {
               id="amount"
               type="text"
               inputMode="decimal"
-              value={formData.amount}
-              onChange={(e) => {
-                // Only allow numbers and decimal point
-                const value = e.target.value.replace(/[^0-9.]/g, "");
-                setFormData({ ...formData, amount: value });
-                // Clear error when user types
-                if (errors.amount) {
-                  setErrors({ ...errors, amount: "" });
-                }
-              }}
-              placeholder="Enter amount"
+              value={amountDisplay}
+              onChange={handleAmountChange}
+              placeholder="0"
               className={`bg-slate-800 border-white/20 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 ${
                 errors.amount ? "border-red-500 focus:border-red-500" : ""
               }`}
