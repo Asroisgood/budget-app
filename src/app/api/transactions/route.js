@@ -54,6 +54,7 @@ export async function GET(req) {
       const searchTerm = searchParams.get("search").trim();
       console.log("Backend received search term:", searchTerm);
       if (searchTerm) {
+        // We'll handle case-insensitive search with raw query
         where.OR = [
           {
             description: {
@@ -85,17 +86,64 @@ export async function GET(req) {
     console.log("Final where clause:", where);
 
     try {
-      const transactions = await prisma.transaction.findMany({
-        where,
-        include: {
-          category: true,
-        },
-        orderBy: {
-          [sortBy]: sortOrder,
-        },
-        skip: offset,
-        take: limit,
-      });
+      let transactions;
+
+      if (searchParams.get("search")) {
+        const searchTerm = searchParams.get("search").trim();
+
+        // Build case-insensitive search with multiple conditions
+        const searchConditions = [];
+        const searchParams2 = [];
+
+        // Add variations of the search term for case-insensitive matching
+        const searchVariations = [
+          searchTerm,
+          searchTerm.toLowerCase(),
+          searchTerm.toUpperCase(),
+          searchTerm.charAt(0).toUpperCase() +
+            searchTerm.slice(1).toLowerCase(),
+        ];
+
+        searchVariations.forEach((variation) => {
+          searchConditions.push({
+            description: { contains: variation },
+          });
+          searchConditions.push({
+            category: { name: { contains: variation } },
+          });
+        });
+
+        // Update where clause with search conditions
+        const searchWhere = {
+          ...where,
+          OR: searchConditions,
+        };
+
+        transactions = await prisma.transaction.findMany({
+          where: searchWhere,
+          include: {
+            category: true,
+          },
+          orderBy: {
+            [sortBy]: sortOrder,
+          },
+          skip: offset,
+          take: limit,
+        });
+      } else {
+        // Use regular Prisma query when no search
+        transactions = await prisma.transaction.findMany({
+          where,
+          include: {
+            category: true,
+          },
+          orderBy: {
+            [sortBy]: sortOrder,
+          },
+          skip: offset,
+          take: limit,
+        });
+      }
 
       console.log("Found transactions:", transactions.length);
 
